@@ -1,0 +1,76 @@
+import pandas as pd
+import numpy as np
+import time
+state=6
+s=0
+action=['left','right']
+APSILON=0.9
+GAMMA=0.9
+ALPHA=0.1
+def build_q_tabel(states,actions):
+    tabel=pd.DataFrame(
+            data=np.zeros((states,len(actions))),
+            columns=actions)
+    return tabel
+
+tabel=build_q_tabel(state,action)
+
+def choose_action(state,qtabel):
+    now_action=qtabel.iloc[state, : ]
+    if np.random.uniform()>APSILON or (now_action==0).all():
+            action_name=np.random.choice(action)
+    else:
+        action_name = now_action.idxmax()
+    return action_name
+
+def env_act(s,a):
+    if a=='right':
+        if s==state-2 :
+            s_ ='terminal'
+            reward=1
+        else:
+            s_=s+1
+            reward=0
+    else:
+        if s==0:
+            s_ = s
+            reward=0
+        else:
+            s_ = s-1
+            reward=0
+    return s_,reward
+
+def env_update(S,episode):
+    p=['-']*(state-1)+['T']
+    if S=='terminal':
+        interaction='Episode %d: total_steps = %d'%(episode+1,step_counter)
+        print('\r{}'.format(interaction))
+        time.sleep(1)
+    else:
+        p[S]='o'
+        interaction=''.join(p)
+        print('\r{}'.format(interaction),end='')
+        time.sleep(0.3)
+
+for episode in range(13):
+    step_counter=0
+    S=0
+    is_termitated=False
+    env_update(S,episode)
+    while not is_termitated:
+        A=choose_action(S,tabel)
+        S_,R=env_act(S,A)
+        predict=tabel.loc[S,A]
+        if (S_=='terminal'):
+            target=R
+            is_termitated= True
+        else:
+            target=R+GAMMA*tabel.iloc[S_,:].max()
+        tabel.loc[S,A]=predict+ALPHA*(target-predict)
+        S=S_
+        step_counter=step_counter+1
+        env_update(S,episode)
+        
+print (tabel)
+        
+            
